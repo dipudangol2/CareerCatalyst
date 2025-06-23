@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import BlogPostCardItem from "../components/BlogPostCardItem";
 
 export default function Resources() {
   const dummyFeaturedPosts = [
@@ -53,9 +54,9 @@ export default function Resources() {
           Browse featured Blog posts
         </p>
 
-        <div className="flex">
+        <div className="relative w-full flex flex-col gap-12 lg:gap-0 lg:flex-row">
           {/* main post  */}
-          <div className="relative flex flex-1/2 flex-col gap-4 lg:pr-6">
+          <div className="relative flex lg:flex-1/2 flex-col gap-4 lg:pr-6">
             <div className="relative p-1 shadow-xl w-full">
               <img
                 src="https://images.unsplash.com/photo-1749741355867-8d40976f2bfb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxfHx8ZW58MHx8fHx8"
@@ -79,7 +80,7 @@ export default function Resources() {
           </div>
 
           {/* related posts  */}
-          <div className="flex-1/2 flex flex-col justify-start gap-3">
+          <div className="relative flex lg:flex-1/2 flex-col justify-start gap-3">
             {/* related posts  */}
             <div className="flex gap-3">
               <div className="flex-center p-1 shadow-xl">
@@ -158,6 +159,26 @@ export default function Resources() {
             </div>
           </div>
         </div>
+
+        {/* browse posts section  */}
+        <section className="mt-[100px]">
+          <p className="font-nav text-body max-w-[500px] text-start font-medium text-textColor-secondary">
+            Browse latest Blog posts
+          </p>
+
+          {/* posts card wrapper  */}
+          <div className="flex flex-wrap">
+            {
+              dummyFeaturedPosts.map((item, index)=>{
+                return <BlogPostCardItem key={index} title={item.title} description={item.description} imgSrc={item.image}/>
+              })
+            }
+          </div>
+
+          <button className="btn-secondary mt-9">
+              Load more
+          </button>
+        </section>
       </section>
     </>
   );
