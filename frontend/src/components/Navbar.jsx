@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import { toast } from 'react-toastify';
 import {NavLink } from 'react-router-dom';
 import {useSelector} from 'react-redux'
 import {Link} from 'react-router-dom'
@@ -26,6 +27,25 @@ export default function Navbar() {
     return () => window.removeEventListener("resize",handleResize);
   }, []);
 
+  const handleLogout=async()=>{
+    try {
+        const res=await fetch("http://localhost:5000/api/auth/logout",{
+            method:"POST",
+            credentials:"include",
+            headers:{ "Content-Type": "application/json" },
+        })
+        const data=await res.json();
+        if(res.ok){
+            toast.success(data.message);
+            window.location.reload();
+        }else{
+            toast.error(data.message);
+        }
+    } catch (error) {
+      toast.error(error.message); 
+    }
+  }
+
   return (
     <nav className='px-10 py-6 flex justify-between items-center font-nav shadow-md'>
 
@@ -45,7 +65,7 @@ export default function Navbar() {
                     <li className='nav-link'><NavLink className={({isActive})=> isActive ? 'active' : ''} to='/contact' onClick={() => !isLargeScreen && setSidebarOpen(!sidebarOpen)}>Contact Us</NavLink></li>
 
                     {currentUser? (
-                      <button className='text-accent-secondary underline underline-offset-2 -mt-1'>Log out</button>
+                      <button className='text-accent-secondary underline underline-offset-2 -mt-1' onClick={handleLogout}>Log out</button>
                     ):(<button className='btn-primary'>
                       <Link to='/auth/sign-up'>Sign Up</Link>
                     </button>)}
