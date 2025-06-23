@@ -10,6 +10,58 @@ import joinUs from "../assets/joinToday.svg";
 import FaqItem from "../components/FaqItem";
 
 export default function Home() {
+  const dummyFaq = [
+    {
+      title: "What is CareerCatalyst?",
+      description:
+        "CareerCatalyst is an AI-powered career assistant that analyzes your resume, suggests personalized improvements, recommends relevant job roles, and even provides a roadmap to help you grow into your dream job.",
+    },
+    {
+      title: "Is CareerCatalyst free to use?",
+      description:
+        "Yes — the MVP version of CareerCatalyst is completely free and doesn’t require sign-up. Just upload your resume and start exploring your results.",
+    },
+    {
+      title: "What types of files can I upload?",
+      description:
+        "Currently, we support PDF and DOCX resumes. Make sure your file is readable (not scanned images) for best results.",
+    },
+    {
+      title: "How does the AI provide resume feedback?",
+      description:
+        "We use OpenAI’s GPT models to analyze your resume and offer suggestions based on hiring best practices, keyword relevance, and clarity of presentation.",
+    },
+    {
+      title: "How are job roles matched to my resume?",
+      description:
+        "Your skills, experience, and projects are extracted from your resume and matched against a predefined role database. We use keyword similarity and AI logic to recommend suitable roles.",
+    },
+    {
+      title: "What’s in the roadmap?",
+      description:
+        "The roadmap includes recommended tools, skills, and mini-projects aligned with your chosen job role — from beginner to job-ready.",
+    },
+    {
+      title: "Is my resume stored or shared?",
+      description:
+        "Nope. Your resume is processed temporarily and never saved. We prioritize your privacy.",
+    },
+    {
+      title: "Can I simulate mentorship?",
+      description:
+        "Yes! We offer simulated mentorship using AI prompts tailored to your background and career goals — just like a real mentor would.",
+    },
+    {
+      title: "Do I need to create an account?",
+      description:
+        "No account is required to use the core features. You can optionally save your data in the future versions we plan to build.",
+    },
+    {
+      title: "Can I trust the advice?",
+      description:
+        "While we aim to provide helpful, personalized guidance, CareerCatalyst should supplement — not replace — real-world mentorship and professional reviews.",
+    },
+  ];
   return (
     <>
       {/* hero section  */}
@@ -156,7 +208,7 @@ export default function Home() {
           <Link className="text-2xl">Sign up</Link>
         </button>
       </section>
-      
+
       {/* your career companion section  */}
       <section className="section-css">
         <h3 className="font-nav max-w-[500px] mx-auto font-semibold">
@@ -205,6 +257,24 @@ export default function Home() {
             Find a Job
           </Link>
         </button>
+      </section>
+
+        {/* faqs section  */}
+      <section className="section-css">
+        <h3 className="font-nav max-w-[500px] mx-auto font-semibold">FAQs</h3>
+        <p className="font-body lg:max-w-[75%] mx-auto">
+          Still have questions? Here are some quick answers to help you get the
+          most out of CareerCatalyst.
+        </p>
+
+        <div className="grid grid-cols-1 font-body md:grid-cols-2 gap-8 mt-5">
+          {/* faq cards  */}
+          {
+            dummyFaq.map((item, index)=>{
+              return <FaqItem title={item.title} description={item.description} key={index} />
+            })
+          }
+        </div>
       </section>
     </>
   );
