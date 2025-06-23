@@ -65,7 +65,6 @@ export default function Navbar() {
                     <li className='nav-link'><NavLink className={({isActive})=> isActive ? 'active' : ''} to='/find-job' onClick={() => !isLargeScreen && setSidebarOpen(!sidebarOpen)}>Find Job</NavLink></li>
                     <li className='nav-link'><NavLink className={({isActive})=> isActive ? 'active' : ''} to='/resources' onClick={() => !isLargeScreen && setSidebarOpen(!sidebarOpen)}>Resources</NavLink></li>
                     <li className='nav-link'><NavLink className={({isActive})=> isActive ? 'active' : ''} to='/counsellor' onClick={() => !isLargeScreen && setSidebarOpen(!sidebarOpen)}>Cousellor</NavLink></li>
-                    <li className='nav-link'><NavLink className={({isActive})=> isActive ? 'active' : ''} to='/contact' onClick={() => !isLargeScreen && setSidebarOpen(!sidebarOpen)}>Contact Us</NavLink></li>
 
                     {currentUser? (
                       <button className='text-accent-secondary underline underline-offset-2 -mt-1' onClick={handleLogout}>Log out</button>
