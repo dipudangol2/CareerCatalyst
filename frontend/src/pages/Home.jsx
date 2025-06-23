@@ -128,7 +128,7 @@ export default function Home() {
             />
             <h5 className="font-heading font-semibold">
               {" "}
-              Instant Job Role Suggestionss
+              Instant Job Role Suggestions
             </h5>
             <p className="font-body text-textColor-secondary">
               Discover jobs you may not even know you’re qualified for.
