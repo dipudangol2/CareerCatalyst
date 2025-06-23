@@ -7,7 +7,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import FindJob from "./pages/FIndJob";
 import Resources from "./pages/Resources";
-import About from "./pages/About";
+import Counsellor from "./pages/Counsellor";
 import Contact from "./pages/Contact";
 import NotFoundPage from "./pages/NotFoundPage";
 import SignUp from "./pages/SignUp";
@@ -24,7 +24,7 @@ export default function App() {
           <Route exact path="/" element={<Home />} />
           <Route path='/resources' element={<Resources/>}/>
           <Route path='/find-job' element={<FindJob/>}/>
-          <Route path='/about' element={<About/>}/>
+          <Route path='/counsellor' element={<Counsellor/>}/>
           <Route path='/contact' element={<Contact/>}/>
         </Route>
         <Route path="/auth/sign-up" element={currentUser ?<Navigate to="/" replace/>: <SignUp />} />
