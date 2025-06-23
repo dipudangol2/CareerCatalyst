@@ -141,6 +141,71 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+         {/* join today section  */}
+      <section className="hidden lg:block py-yAxis-sm section-css">
+        <div className="flex-center">
+          <img
+            src={joinUs}
+            alt="join-todaysvg"
+            className="w-full h-auto rounded-2xl"
+            loading="lazy"
+          />
+        </div>
+        <button className="absolute top-[55%] right-[20%] -translate-x-1/2 -translate-y-1/2 rounded-xl btn-secondary">
+          <Link className="text-2xl">Sign up</Link>
+        </button>
+      </section>
+      
+      {/* your career companion section  */}
+      <section className="section-css">
+        <h3 className="font-nav max-w-[500px] mx-auto font-semibold">
+          Your Career Companion in 3 Steps
+        </h3>
+        <p className="font-body lg:max-w-[75%] mx-auto">
+          CareerCatalyst makes career growth effortless. Upload your resume, get
+          personalized feedback powered by AI, explore job roles that fit your
+          strengths, and follow a clear roadmap to reach your goals — all in
+          just a few clicks.
+        </p>
+
+        <div className="flex flex-col md:flex-row items-center md:justify-between mt-5">
+          {/* career step cards  */}
+          <div className="careerStep-cards">
+            <h5 className="font-heading font-semibold"> 🧑‍💻 Upload & Analyze</h5>
+            <p className="font-body text-textColor-secondary">
+              Upload your resume (PDF or DOCX) and let our AI extract key
+              information about your skills, experience, and strengths.
+            </p>
+          </div>
+          <div className="careerStep-cards">
+            <h5 className="font-heading font-semibold">
+              {" "}
+              🧠 Get Smart Suggestions
+            </h5>
+            <p className="font-body text-textColor-secondary">
+              Receive personalized improvement tips and role recommendations
+              based on your unique profile — just like having a career coach by
+              your side.
+            </p>
+          </div>
+          <div className="careerStep-cards">
+            <h5 className="font-heading font-semibold">
+              {" "}
+              🚀 Follow a Career Roadmap
+            </h5>
+            <p className="font-body text-textColor-secondary">
+              Get a step-by-step learning path to reach your desired job role,
+              with suggested tools, projects, and courses.
+            </p>
+          </div>
+        </div>
+        <button className="btn-secondary mx-auto w-fit">
+          <Link to="/find-job" className="text-2xl">
+            Find a Job
+          </Link>
+        </button>
+      </section>
     </>
   );
 }
