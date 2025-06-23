@@ -26,6 +26,30 @@ export default function SignUp() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    // form validation 
+    if(formData.fullName.trim() === "" || formData.email.trim() === "" || formData.password.trim() === "" ) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
+        body: JSON.stringify(formData),
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Account created successfully");
+        navigate("/auth/sign-in");
+      }else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
    
   };
 
