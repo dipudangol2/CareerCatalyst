@@ -40,6 +40,107 @@ export default function Home() {
         </div>
       </section>
 
+ {/* unlock your potential section  */}
+      <section className="section-css">
+        <h3 className="font-nav max-w-[500px] mx-auto font-semibold">
+          Unlock your potential with Career Counselling
+        </h3>
+        <p className="font-body lg:max-w-[75%] mx-auto">
+          Unlock your potential with our career counselling services. Our expert
+          counsellors will help you unlock your full potential and find the job
+          role that best suits your skills and interests.
+        </p>
+
+        <div className="flex flex-wrap justify-between mt-2">
+          {/* services cards  */}
+          <div className="service-cards">
+            <img
+              src={brain}
+              alt="title-icon"
+              className="w-[50px] h-[50px] object-cover"
+            />
+            <h5 className="font-heading font-semibold">
+              {" "}
+              Smart Resume Insights
+            </h5>
+            <p className="font-body text-textColor-secondary">
+              Get actionable feedback on your resume using AI — no more
+              guesswork.
+            </p>
+          </div>
+          <div className="service-cards">
+            <img
+              src={job}
+              alt="title-icon"
+              className="w-[50px] h-[50px] object-cover"
+            />
+            <h5 className="font-heading font-semibold">
+              {" "}
+              Instant Job Role Suggestionss
+            </h5>
+            <p className="font-body text-textColor-secondary">
+              Discover jobs you may not even know you’re qualified for.
+            </p>
+          </div>
+          <div className="service-cards">
+            <img
+              src={time}
+              alt="title-icon"
+              className="w-[50px] h-[50px] object-cover"
+            />
+            <h5 className="font-heading font-semibold">
+              {" "}
+              Save Hours of Research
+            </h5>
+            <p className="font-body text-textColor-secondary">
+              No need to Google endlessly — we simplify it into one dashboard.
+            </p>
+          </div>
+          <div className="service-cards">
+            <img
+              src={mentor}
+              alt="title-icon"
+              className="w-[50px] h-[50px] object-cover"
+            />
+            <h5 className="font-heading font-semibold">
+              {" "}
+              Simulated Career Mentorship
+            </h5>
+            <p className="font-body text-textColor-secondary">
+              Get expert-style guidance and encouragement tailored to your goals
+              — just like having a mentor in your pocket.
+            </p>
+          </div>
+          <div className="service-cards">
+            <img
+              src={brain}
+              alt="title-icon"
+              className="w-[50px] h-[50px] object-cover"
+            />
+            <h5 className="font-heading font-semibold">
+              {" "}
+              Personalized Career Paths
+            </h5>
+            <p className="font-body text-textColor-secondary">
+              We match your profile with roles and learning paths that fit your
+              goals..
+            </p>
+          </div>
+          <div className="service-cards">
+            <img
+              src={roadmap}
+              alt="title-icon"
+              className="w-[50px] h-[50px] object-cover"
+            />
+            <h5 className="font-heading font-semibold">
+              Career Roadmap Generator
+            </h5>
+            <p className="font-body text-textColor-secondary">
+              Know what to learn next with clear, AI-generated learning paths..
+            </p>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

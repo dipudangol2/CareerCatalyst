@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import { toast } from 'react-toastify';
 import {NavLink } from 'react-router-dom';
-import {useSelector} from 'react-redux'
+import {useSelector, useDispatch} from 'react-redux'
+import { signOutSuccess } from '../redux/userSlice';
 import {Link} from 'react-router-dom'
 import logo from '../assets/logo.svg'
 import hamburger from '../assets/hamburger.svg'
@@ -9,6 +10,7 @@ import cross from '../assets/cross.svg'
 
 export default function Navbar() {
   const {currentUser} =useSelector(state=>state.user);
+  const dispatch = useDispatch();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth>1024);
 
@@ -37,6 +39,7 @@ export default function Navbar() {
         const data=await res.json();
         if(res.ok){
             toast.success(data.message);
+            dispatch(signOutSuccess())
             window.location.reload();
         }else{
             toast.error(data.message);
