@@ -10,7 +10,6 @@ import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
 dotenv.config();
 const geminiKey = process.env.GOOGLE_GEMINI_API_KEY;
-console.log(geminiKey);
 // * cjs to mjs
 
 
@@ -116,8 +115,9 @@ export const logout = (request, response, next) => {
 
 export const addResume = async (request, response, next) => {
     try {
+        // * take resume from the frontend and store the file
         if (!request.file) {
-            return response.status(400).send("File is required!");
+            return response.status(400).send({ message: "File is required!" });
         }
         const date = Date.now();
         let fileName = "uploads/resume/" + date + request.file.originalname;
@@ -131,7 +131,102 @@ export const addResume = async (request, response, next) => {
             runValidators: true,
         }
         );
+        // * pdf parsing and json creation
+        let pdfData = "";
+        let dataBuffer = fs.readFileSync(`./${fileName}`);
+        const data = await pdfParse(dataBuffer);
+        pdfData += data.text
+        let aiPrompt = geminiPrompt(pdfData);
+        const pdfParseResponse = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: aiPrompt,
+        })
+        fs.writeFile("./uploads/geminiOutput.txt", pdfParseResponse.text, () => {
+            console.log("Completed generation!");
+        })
+        const aiOutput = pdfParseResponse.text;
+        let parsedResult = aiOutput.replace(/^\`\`\`json\s*/, '');
+        parsedResult = parsedResult.replace(/\`\`\`$/, '');
+        fs.writeFile("./pdf/geminiOutput2.txt", parsedResult, () => {
+            console.log("written file!");
+        });
+        const pdfImprovementPrompt = `
+            Act as a **Senior Resume Analyst** and **ATS Optimization Expert**. Analyze the following resume JSON using weighted metrics and provide structured feedback. Focus on technical roles (e.g., Cloud, DevOps, Software Engineering).  
+        
+            ### **Evaluation Criteria & Weights**  
+            1. **Content & Structure (20%)**  
+               - Clarity (0-5)  
+               - Conciseness (0-5)  
+               - Grammar/Spelling (0-5)  
+               - Reverse Chronology (0-5)  
 
+            2. **Technical Skills (30%)**  
+               - Keyword Density (% match to target job description)  
+               - Skill Stacking (Grouping foundational + advanced skills)  
+               - Certifications (AWS, Kubernetes, etc.)  
+               - Tool Diversity (Breadth of technologies)  
+
+            3. **Experience & Impact (30%)**  
+               - Quantifiable Results (0-10)  
+               - Role Relevance (0-10)  
+            - Project Depth (0-10)  
+            - Career Progression (0-10)  
+                
+            4. **ATS & Readability (20%)**  
+            - Header Formatting (✅/❌)  
+            - Machine Readability (✅/❌)  
+            - Keyword Placement (First 1/3 of resume)  
+            - Action Verbs (e.g., "Optimized," "Architected")  
+                
+            5. **Red Flags (Penalties)**  
+            - Employment Gaps (>6 months): -5 pts  
+            - Overused Buzzwords: -3 pts  
+            - Generic Objectives: -2 pts  
+                
+            ### **Instructions**  
+            1. **Calculate Scores** for each category (0-100).  
+            2. **Highlight Top 5 Skills** prioritized by industry demand.  
+            3. **Identify Gaps** (e.g., missing Docker/Kubernetes for DevOps).  
+            4. **Suggest Improvements** with examples:  
+            - Rewrite weak bullet points (e.g., "Reduced AWS costs by 30% via Lambda optimization").  
+            - ATS fixes (e.g., replace "Managed servers" with "Deployed scalable EC2 instances").  
+                
+            ### **Output Format**  
+            json
+            {
+            "overall_score": 82,
+            "score_breakdown": {
+                "content_structure": 18/20,
+                "technical_skills": 26/30,
+                "experience_impact": 24/30,
+                "ats_readability": 16/20,
+                "red_flags": -2
+            },
+            "priority_skills": ["AWS", "Linux", "Python", "Terraform", "React"],
+            "missing_skills": ["Kubernetes", "CI/CD Pipelines", "Prometheus"],
+            "improvements": [
+                "Add metrics to 'Cloud Apprentice' role (e.g., 'Auto-scaled 50+ EC2 instances').",
+                "Merge 'HTML/CSS/JS' into 'Frontend Development' for ATS.",
+                "Include a 'Technical Skills' matrix with subcategories."
+            ],
+            "strengths": [
+                "AWS Certification (SAA-C03) is highly valuable",
+                "Diverse project portfolio demonstrating full-stack skills"
+            ],
+            "weaknesses": [
+                "No quantifiable results in work experience",
+                "Skills lack context (e.g., 'Python' → 'Built Flask APIs with Python')"
+            ]
+            }  Here is the parsed resume json:`+ parsedResult
+        // console.log(pdfImprovementPrompt);
+        const aiPDFStats = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: pdfImprovementPrompt,
+        })
+
+        fs.writeFile("./pdf/ResumeStats.txt", aiPDFStats.text, () => {
+            console.log("sucessfully analysis");
+        });
         return response.status(200).json({
             resume: updatedUser.resume,
         });
@@ -167,6 +262,7 @@ export const parsePDF = async (request, response, next) => {
             console.log("written file!");
         })
         const res = JSON.parse(result);
+
         console.log(res);
 
         response.send(200);
