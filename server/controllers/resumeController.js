@@ -212,6 +212,6 @@ export const generateRoadmap = async (request, response, next) => {
     }
     catch (error) {
         console.log("Error in roadmap generation", error);
-        return response.status(500).send("Internal Server Error!");
+        return response.status(500).send({message: "Internal Server Error!"});
     }
 }
