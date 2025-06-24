@@ -5,7 +5,8 @@ import PrivateRoute from "./components/PrivateRoute";
 import { useSelector } from "react-redux";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
-import FindJob from "./pages/FIndJob";
+import FindJob from "./pages/FindJob";
+import ResumeAnalysis from "./pages/ResumeAnalysis";
 import Resources from "./pages/Resources";
 import Counsellor from "./pages/Counsellor";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -24,6 +25,7 @@ export default function App() {
           <Route path='/resources' element={<Resources/>}/>
           <Route path='/find-job' element={<FindJob/>}/>
           <Route path='/counsellor' element={<Counsellor/>}/>
+          <Route path='/resume-analysis' element={<ResumeAnalysis/>}/>
         </Route>
         <Route path="/auth/sign-up" element={currentUser ?<Navigate to="/" replace/>: <SignUp />} />
         <Route path="/auth/sign-in" element={currentUser ? <Navigate to="/" replace/> : <SignIn />} />

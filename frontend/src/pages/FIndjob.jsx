@@ -1,14 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import resume from "../assets/resume.svg";
+import JobItem from "../components/JobItem";
 import webDev from "../assets/webDev.svg";
 import bookmark from "../assets/bookmark.svg";
 import loadingIcon from "../assets/loading.gif";
+import star from "../assets/star.svg";
 
-export default function FIndjob() {
+export default function Findjob() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [parsedResume, setParsedResume] = useState({});
   const fileRef = useRef(null);
+
+  useEffect(() => {
+    setParsedResume(JSON.parse(localStorage.getItem("resumeData")));
+  }, []);
 
   const handleFileSelect = async () => {
     fileRef.current.click();
@@ -24,15 +32,32 @@ export default function FIndjob() {
     if (!file) {
       return toast.error("Please select a file");
     }
+
+    const formData = new FormData();
+    formData.append("resume", file);
     try {
       setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        setFile(null);
+      const res = await fetch("http://localhost:5000/api/resume/add-resume", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const parsedData = data.stats.replace("```json", "");
+        const finalParsed = parsedData.replace("```", "");
+        setParsedResume(JSON.parse(finalParsed));
+        localStorage.setItem("resumeData", finalParsed);
         toast.success("Resume uploaded successfully");
-      }, 2000);
-    } catch (error) {}
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  console.log(parsedResume);
 
   return (
     <section className="section-css max-w-[1500px]">
@@ -83,15 +108,41 @@ export default function FIndjob() {
             )}
           </div>
 
-          <button className="btn-secondary mx-auto mt-5 " onClick={handleUpload}>
+          <button
+            className="btn-secondary mx-auto mt-5 "
+            onClick={handleUpload}
+          >
             Upload
           </button>
+
+          {/* resume analysis part */}
+          {Object.keys(parsedResume).length !== 0 && (
+            <div className="flex justify-between mt-8">
+              <p className="relative text-textColor-secondary font-body font-medium">
+                Your resume score:
+                <span className="ml-3">
+                  {parsedResume["overall_score"]}/100
+                </span>
+              </p>
+
+              <Link
+                to="/resume-analysis"
+                className="text-textColor-secondary font-body hover:text-accent-secondary transition-default underline "
+              >
+                Click here: overview of your resume
+              </Link>
+            </div>
+          )}
 
           {/* recommended job roles  */}
           <div className="flex flex-col gap-10 mt-5">
             <div className="flex justify-between">
               <p className="font-body text-textColor-secondary font-medium">
-                284 results found
+                {Object.keys(parsedResume).includes("careerRecommendations")
+                  ? `${
+                      Object.keys(parsedResume["careerRecommendations"]).length
+                    } results found`
+                  : "0 results found"}
               </p>
 
               {/* filter feature */}
@@ -99,134 +150,95 @@ export default function FIndjob() {
 
             {/* job roles  */}
             <div className="flex flex-col gap-6 w-full relative">
-              {/* job items  */}
-              <div className="flex gap-4 px-4 py-6 shadow-md">
-                {/* image  */}
-                <div className="flex-center p-2 h-fit border-[1px] border-gray-200">
-                  <img
-                    src={webDev}
-                    alt="job-icon"
-                    className="min-w-15 h-15 object-cover"
-                  />
-                </div>
-                {/* content  */}
-                <div className="flex grow text-start flex-col gap-1">
-                  <h6 className="font-nav font-semibold">Web Developer</h6>
-                  <p className="font-body font-medium text-textColor-secondary max-w-[600px]">
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Consequatur odio in, veritatis maiores itaque harum incidunt
-                    esse ill.
-                  </p>
-                  {/* roadmap  */}
-                  <div className="mt-3">
-                    <button className="btn-secondary">Roadmap</button>
-                  </div>
-
-                  <div className="flex justify-between items-center flex-wrap mt-5">
-                    {/* salary  */}
-                    <div className="flex flex-col gap-1 font-medium">
-                      <p className="text-textColor-secondary">Avg. Salary</p>
-                      <p className="text-shadow-textColor-primary">
-                        $30,000 - $50,000
-                      </p>
-                    </div>
-
-                    {/* save job  */}
-                    <div className="inline">
-                      <button className="flex">
-                        <img
-                          src={bookmark}
-                          alt="bookmarkIcon"
-                          className="w-6 h-6 opacity-35"
-                        />
-                        <span className="ml-2">Save job</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* job items  */}
-              <div className="flex gap-4 px-4 py-6 shadow-md">
-                {/* image  */}
-                <div className="flex-center p-2 h-fit border-[1px] border-gray-200">
-                  <img
-                    src={webDev}
-                    alt="job-icon"
-                    className="min-w-15 h-15 object-cover"
-                  />
-                </div>
-                {/* content  */}
-                <div className="flex grow text-start flex-col gap-1">
-                  <h6 className="font-nav font-semibold">Web Developer</h6>
-                  <p className="font-body font-medium text-textColor-secondary max-w-[600px]">
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Consequatur odio in, veritatis maiores itaque harum incidunt
-                    esse ill.
-                  </p>
-                  {/* roadmap  */}
-                  <div className="mt-3">
-                    <button className="btn-secondary">Roadmap</button>
-                  </div>
-
-                  <div className="flex justify-between items-center flex-wrap mt-5">
-                    {/* salary  */}
-                    <div className="flex flex-col gap-1 font-medium">
-                      <p className="text-textColor-secondary">Avg. Salary</p>
-                      <p className="text-shadow-textColor-primary">
-                        $30,000 - $50,000
-                      </p>
-                    </div>
-
-                    {/* save job  */}
-                    <div className="inline">
-                      <button className="flex">
-                        <img
-                          src={bookmark}
-                          alt="bookmarkIcon"
-                          className="w-6 h-6 opacity-35"
-                        />
-                        <span className="ml-2">Save job</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {Object.keys(parsedResume).includes("careerRecommendations") &&
+                parsedResume["careerRecommendations"].map((job, index) => (
+                  <JobItem job={job} key={index} />
+                ))}
             </div>
           </div>
         </div>
 
         <div className="flex flex-col lg:col-span-1 gap-5">
-              <h6 className="font-nav font-semibold text-start">Recommended for you</h6>
-              <div className="flex flex-col gap-5">
+          <h6 className="font-nav font-semibold text-start">
+            Recommended for you
+          </h6>
+          <div className="flex flex-col gap-5">
+            {/* recommended job UI  */}
+            <div className="flex gap-3 items-center">
+              <img
+                src="https://plus.unsplash.com/premium_photo-1750063400799-d3d386a86c36?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyfHx8ZW58MHx8fHx8"
+                alt=""
+                className="w-16 h-16 object-cover"
+              />
 
-                  {/* recommended job UI  */}
-                  <div className="flex gap-3 items-center">
-                    <img src="https://plus.unsplash.com/premium_photo-1750063400799-d3d386a86c36?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyfHx8ZW58MHx8fHx8" alt="" className="w-16 h-16 object-cover" />
-
-                    <div className="flex text-start flex-col gap-1">
-                        <p className="font-nav font-medium">Web Developer</p>
-                        <p className="font-body text-textColor-secondary">Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
-                    </div>
-                  </div>
-                  {/* recommended job UI  */}
-                  <div className="flex gap-3 items-center">
-                    <img src="https://images.unsplash.com/photo-1750008267598-7f68e1a25ab8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw4fHx8ZW58MHx8fHx8" alt="" className="w-16 h-16 object-cover" />
-
-                    <div className="flex text-start flex-col gap-1">
-                        <p className="font-nav font-medium">Web Designer</p>
-                        <p className="font-body text-textColor-secondary">Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
-                    </div>
-                  </div>
-                  {/* recommended job UI  */}
-                  <div className="flex gap-3 items-center">
-                    <img src="https://images.unsplash.com/photo-1750101272034-7becde7454dd?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw5fHx8ZW58MHx8fHx8" alt="" className="w-16 h-16 object-cover" />
-
-                    <div className="flex text-start flex-col gap-1">
-                        <p className="font-nav font-medium">Backend engineer</p>
-                        <p className="font-body text-textColor-secondary">Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
-                    </div>
-                  </div>
+              <div className="flex text-start flex-col gap-1">
+                <p className="font-nav font-medium">Web Developer</p>
+                <p className="font-body text-textColor-secondary">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                </p>
               </div>
+            </div>
+            {/* recommended job UI  */}
+            <div className="flex gap-3 items-center">
+              <img
+                src="https://images.unsplash.com/photo-1750008267598-7f68e1a25ab8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw4fHx8ZW58MHx8fHx8"
+                alt=""
+                className="w-16 h-16 object-cover"
+              />
+
+              <div className="flex text-start flex-col gap-1">
+                <p className="font-nav font-medium">Web Designer</p>
+                <p className="font-body text-textColor-secondary">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                </p>
+              </div>
+            </div>
+            {/* recommended job UI  */}
+            <div className="flex gap-3 items-center">
+              <img
+                src="https://images.unsplash.com/photo-1750101272034-7becde7454dd?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw5fHx8ZW58MHx8fHx8"
+                alt=""
+                className="w-16 h-16 object-cover"
+              />
+
+              <div className="flex text-start flex-col gap-1">
+                <p className="font-nav font-medium">Backend engineer</p>
+                <p className="font-body text-textColor-secondary">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                </p>
+              </div>
+            </div>
+            {/* recommended job UI  */}
+            <div className="flex gap-3 items-center">
+              <img
+                src="https://plus.unsplash.com/premium_photo-1750063400799-d3d386a86c36?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyfHx8ZW58MHx8fHx8"
+                alt=""
+                className="w-16 h-16 object-cover"
+              />
+
+              <div className="flex text-start flex-col gap-1">
+                <p className="font-nav font-medium">Web Developer</p>
+                <p className="font-body text-textColor-secondary">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                </p>
+              </div>
+            </div>
+            {/* recommended job UI  */}
+            <div className="flex gap-3 items-center">
+              <img
+                src="https://images.unsplash.com/photo-1750008267598-7f68e1a25ab8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw4fHx8ZW58MHx8fHx8"
+                alt=""
+                className="w-16 h-16 object-cover"
+              />
+
+              <div className="flex text-start flex-col gap-1">
+                <p className="font-nav font-medium">Web Designer</p>
+                <p className="font-body text-textColor-secondary">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       {/* resume upload button  */}

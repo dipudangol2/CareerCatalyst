@@ -1,40 +1,41 @@
-@layer components{
-    .btn-primary{
-        @apply bg-[var(--color-accent-primary)] hover:bg-[var(--color-btn-hover)] text-white py-2 px-4 rounded transition-default;
-    }
-    .btn-secondary{
-        @apply bg-[var(--color-accent-secondary)] hover:bg-[var(--color-btn-hover)] text-white py-2 px-4 rounded transition-default;
-    }
-    .form-item{
-        @apply  relative xs:min-w-[250px] sm:min-w-[350px] text-start px-3 py-2 bg-white rounded-sm shadow-sm flex flex-col gap-[2px] text-sm font-body;
-    }
-    
-    .sidebar-open{
-        @apply translate-x-full;
-    }
-    .nav-link{
-        @apply font-medium text-[var(--color-textColor-secondary)] hover:text-[var(--color-textColor-primary)] transition-default;
-    }
-    .nav-link > .active{
-        @apply text-[var(--color-textColor-primary)];
-    }
-    .section-css{
-        @apply relative px-xAxis-sm sm:px-xAxis-md md:px-xAxis-lg py-yAxis-lg max-w-[1450px] text-center mx-auto flex flex-col gap-6;
-    }
-    .service-cards{
-        @apply flex-1 min-w-[200px] md:flex-1/3 flex flex-col max-w-[500px] gap-4 items-center px-5 py-6;
-    }
-    .careerStep-cards{
-        @apply  w-full md:flex-1/3 flex flex-col max-w-[600px] gap-4 items-center px-5 py-6;
-    }
+@layer components {
+  .btn-primary {
+    @apply bg-[var(--color-accent-primary)] hover:bg-[var(--color-btn-hover)] text-white py-2 px-4 rounded transition-default;
+  }
+  .btn-secondary {
+    @apply bg-[var(--color-accent-secondary)] hover:bg-[var(--color-btn-hover)] text-white py-2 px-4 rounded transition-default;
+  }
+  .form-item {
+    @apply relative xs:min-w-[250px] sm:min-w-[350px] text-start px-3 py-2 bg-white rounded-sm shadow-sm flex flex-col gap-[2px] text-sm font-body;
+  }
 
-    .faq-button{
-        @apply flex justify-between cursor-pointer text-textColor-secondary
-    }
-    .faq-hidden{
-        @apply max-h-0 overflow-hidden text-textColor-secondary text-start transition-default;
-    }
-    .faq-hidden.active{
-        @apply max-h-[100px];
-    }
+  .sidebar-open {
+    @apply translate-x-full;
+  }
+  .nav-link {
+    @apply font-medium text-[var(--color-textColor-secondary)] hover:text-[var(--color-textColor-primary)] transition-default;
+  }
+  .nav-link > .active {
+    @apply text-[var(--color-textColor-primary)];
+  }
+  .section-css {
+    @apply relative px-xAxis-sm sm:px-xAxis-md md:px-xAxis-lg py-yAxis-lg max-w-[1450px] text-center mx-auto flex flex-col gap-6;
+  }
+  .service-cards {
+    @apply flex-1 min-w-[200px] md:flex-1/3 flex flex-col max-w-[500px] gap-4 items-center px-5 py-6;
+  }
+  .careerStep-cards {
+    @apply w-full md:flex-1/3 flex flex-col max-w-[600px] gap-4 items-center px-5 py-6;
+  }
+
+  .faq-button {
+    @apply flex justify-between cursor-pointer text-textColor-secondary;
+  }
+  .faq-hidden {
+    @apply max-h-0 overflow-hidden text-textColor-secondary text-start transition-default;
+  }
+  .faq-hidden.active {
+    @apply max-h-[100px];
+  }
+  
 }
