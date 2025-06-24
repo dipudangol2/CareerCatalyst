@@ -12,6 +12,7 @@ export default function Findjob() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [parsedResume, setParsedResume] = useState({});
+  const [roadmap, setRoadmap] = useState({});
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -57,8 +58,28 @@ export default function Findjob() {
     }
   };
 
-  console.log(parsedResume);
 
+  const handleRoadmapGeneration=async (title)=>{
+
+    try {
+      const res=await fetch('http://localhost:5000/api/resume/generate-roadmap',{
+        method:"POST",
+        credentials:"include",
+        body:{
+          title:title.toString()
+        }
+      })
+      const data=await res.json();
+      if(res.ok){
+        setRoadmap(data);
+        console.log(data)
+        localStorage.setItem("roadmap",JSON.stringify(data));
+      }
+    } catch (error) {
+      console.log(error.message)
+      toast.error(error.message);
+    }
+  }
   return (
     <section className="section-css max-w-[1500px]">
       <h2 className="font-body text-start font-semibold">
@@ -152,7 +173,7 @@ export default function Findjob() {
             <div className="flex flex-col gap-6 w-full relative">
               {Object.keys(parsedResume).includes("careerRecommendations") &&
                 parsedResume["careerRecommendations"].map((job, index) => (
-                  <JobItem job={job} key={index} />
+                  <JobItem job={job} key={index} handleRoadmapGeneration={handleRoadmapGeneration}/>
                 ))}
             </div>
           </div>

@@ -2,7 +2,11 @@ import React from "react";
 import webDev from "../assets/webDev.svg";
 import bookmark from "../assets/bookmark.svg";
 
-export default function JobItem({job}) {
+export default function JobItem({job,handleRoadmapGeneration }){
+    const handleGeneration=async (title)=>{
+        console.log(title)
+        handleRoadmapGeneration(title)
+    }
   return (
     <div className="flex gap-4 px-4 py-6 shadow-md">
       {/* image  */}
@@ -23,7 +27,7 @@ export default function JobItem({job}) {
         </p>
         {/* roadmap  */}
         <div className="mt-3">
-          <button className="btn-secondary">Roadmap</button>
+          <button className="btn-secondary" onClick={()=>handleGeneration(job.title)}>Roadmap</button>
         </div>
 
         <div className="flex justify-between items-center flex-wrap mt-5">
