@@ -10,7 +10,7 @@ const upload = multer({ dest: "uploads/resume/" });
 authRoutes.post("/signup", signup);
 authRoutes.post("/login", login);
 authRoutes.post("/logout", logout);
-authRoutes.post("/add-resume", verifyToken, upload.single("resume"), addResume);
-authRoutes.post("/parsepdf", parsePDF);
+authRoutes.post("/add-resume", verifyToken, upload.single("resume"), addResume,parsePDF);
+// authRoutes.post("/parsepdf", parsePDF);
 
 export default authRoutes;

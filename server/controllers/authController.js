@@ -147,9 +147,101 @@ export const addResume = async (request, response, next) => {
         const aiOutput = pdfParseResponse.text;
         let parsedResult = aiOutput.replace(/^\`\`\`json\s*/, '');
         parsedResult = parsedResult.replace(/\`\`\`$/, '');
-        fs.writeFile("./pdf/geminiOutput2.txt", parsedResult, () => {
-            console.log("written file!");
-        });
+        request.body = parsedResult;
+        next();
+        // fs.writeFile("./pdf/geminiOutput2.txt", parsedResult, () => {
+        //     console.log("written file!");
+        // });
+
+        // const pdfImprovementPrompt = `
+        //     Act as a Senior Resume Analyst and ATS Optimization Expert. Analyze the following resume JSON using weighted metrics and provide structured feedback. Focus on technical roles (e.g.Frontend development, Backend Development, Cloud, DevOps, Software Engineering).  
+
+        //     ### Evaluation Criteria & Weights  
+        //     1. Content & Structure (20%)  
+        //        - Clarity (0-5)  
+        //        - Conciseness (0-5)  
+        //        - Grammar/Spelling (0-5)  
+        //        - Reverse Chronology (0-5)  
+
+        //     2. Technical Skills (30%)  
+        //        - Keyword Density (% match to target job description)  
+        //        - Skill Stacking (Grouping foundational + advanced skills)  
+        //        - Certifications (AWS, Kubernetes, etc.)  
+        //        - Tool Diversity (Breadth of technologies)  
+
+        //     3. Experience & Impact (30%)  
+        //        - Quantifiable Results (0-10)  
+        //        - Role Relevance (0-10)  
+        //     - Project Depth (0-10)  
+        //     - Career Progression (0-10)  
+
+        //     4. ATS & Readability (20%)  
+        //     - Header Formatting (✅/❌)  
+        //     - Machine Readability (✅/❌)  
+        //     - Keyword Placement (First 1/3 of resume)  
+        //     - Action Verbs (e.g., "Optimized," "Architected")  
+
+        //     5. Red Flags (Penalties)  
+        //     - Employment Gaps (>6 months): -5 pts  
+        //     - Overused Buzzwords: -3 pts  
+        //     - Generic Objectives: -2 pts  
+
+        //     ### Instructions  
+        //     1. Calculate Scores for each category (0-100).  
+        //     2. Highlight Top 5 Skills prioritized by industry demand but relevant to the resume.  
+        //     3. Identify Gaps according to the skillset(e.g., missing Docker/Kubernetes for DevOps).  
+        //     4. Suggest Improvements with examples:  
+        //     - Rewrite weak bullet points (e.g., "Reduced AWS costs by 30% via Lambda optimization").  
+        //     - ATS fixes (e.g., replace "Managed servers" with "Deployed scalable EC2 instances").  
+
+        //     ### Output Format  
+        //     json
+        //     {
+        //     "overall_score": ,
+        //     "score_breakdown": {
+        //         "content_structure": ,
+        //         "technical_skills": ,
+        //         "experience_impact": ,
+        //         "ats_readability": ,
+        //         "red_flags": 
+        //     },
+        //     "priority_skills": [],
+        //     "missing_skills": [],
+        //     "improvements": [
+
+        //     ],
+        //     "strengths": [
+
+        //     ],
+        //     "weaknesses": [
+
+        //     ]
+        //     }  
+        //     Here is the parsed resume json:`+ parsedResult
+        // // console.log(pdfImprovementPrompt);
+        // const aiPDFStats = await ai.models.generateContent({
+        //     model: "gemini-2.5-flash",
+        //     contents: pdfImprovementPrompt,
+        // })
+
+        // fs.writeFile("./pdf/ResumeStats.txt", aiPDFStats.text, () => {
+        //     console.log("sucessfully analysis");
+        // });
+
+        // return response.status(200).json({
+        //     resume: updatedUser.resume,
+        //     stats: aiPDFStats.text
+        // });
+
+    } catch (error) {
+        console.log(`Error occured: ${error}`);
+        return response.status(500).send("Internal Server Error");
+    }
+
+}
+
+export const parsePDF = async (request, response, next) => {
+    try {
         const pdfImprovementPrompt = `
             Act as a Senior Resume Analyst and ATS Optimization Expert. Analyze the following resume JSON using weighted metrics and provide structured feedback. Focus on technical roles (e.g.Frontend development, Backend Development, Cloud, DevOps, Software Engineering).  
         
@@ -214,7 +306,7 @@ export const addResume = async (request, response, next) => {
                 
             ]
             }  
-            Here is the parsed resume json:`+ parsedResult
+            Here is the parsed resume json:`+ request.body;
         // console.log(pdfImprovementPrompt);
         const aiPDFStats = await ai.models.generateContent({
             model: "gemini-2.5-flash",
@@ -222,49 +314,13 @@ export const addResume = async (request, response, next) => {
         })
 
         fs.writeFile("./pdf/ResumeStats.txt", aiPDFStats.text, () => {
-            console.log("sucessfully analysis");
+            console.log("sucessfull Analysis");
         });
-        
+        const user = User.findById(request.userId);
         return response.status(200).json({
-            resume: updatedUser.resume,
+            resume: user.resume,
             stats: aiPDFStats.text
         });
-
-    } catch (error) {
-        console.log(`Error occured: ${error}`);
-        return response.status(500).send("Internal Server Error");
-    }
-
-}
-
-export const parsePDF = async (request, response, next) => {
-    try {
-        let pdfData = "";
-        let dataBuffer = fs.readFileSync("./pdf/Dipu-Dangol-Resume.pdf");
-        const data = await pdfParse(dataBuffer)
-
-        pdfData += data.text
-        console.log(pdfData);
-        let aiPrompt = geminiPrompt(pdfData);
-        console.log(aiPrompt);
-        const pdfParseResponse = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: aiPrompt,
-        })
-        fs.writeFile("./pdf/geminiOutput.txt", pdfParseResponse.text, () => {
-            console.log("Completed generation!");
-        })
-        const aiOutput = pdfParseResponse.text;
-        let result = aiOutput.replace(/^\`\`\`json\s*/, '');
-        result = result.replace(/\`\`\`$/, '');
-        fs.writeFile("./pdf/geminiOutput2.txt", result, () => {
-            console.log("written file!");
-        })
-        const res = JSON.parse(result);
-
-        console.log(res);
-
-        response.send(200);
     }
     catch (error) {
         console.log("Error occured in parsePDF:" + error);
