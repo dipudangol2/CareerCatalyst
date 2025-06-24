@@ -151,73 +151,70 @@ export const addResume = async (request, response, next) => {
             console.log("written file!");
         });
         const pdfImprovementPrompt = `
-            Act as a **Senior Resume Analyst** and **ATS Optimization Expert**. Analyze the following resume JSON using weighted metrics and provide structured feedback. Focus on technical roles (e.g., Cloud, DevOps, Software Engineering).  
+            Act as a Senior Resume Analyst and ATS Optimization Expert. Analyze the following resume JSON using weighted metrics and provide structured feedback. Focus on technical roles (e.g.Frontend development, Backend Development, Cloud, DevOps, Software Engineering).  
         
-            ### **Evaluation Criteria & Weights**  
-            1. **Content & Structure (20%)**  
+            ### Evaluation Criteria & Weights  
+            1. Content & Structure (20%)  
                - Clarity (0-5)  
                - Conciseness (0-5)  
                - Grammar/Spelling (0-5)  
                - Reverse Chronology (0-5)  
 
-            2. **Technical Skills (30%)**  
+            2. Technical Skills (30%)  
                - Keyword Density (% match to target job description)  
                - Skill Stacking (Grouping foundational + advanced skills)  
                - Certifications (AWS, Kubernetes, etc.)  
                - Tool Diversity (Breadth of technologies)  
 
-            3. **Experience & Impact (30%)**  
+            3. Experience & Impact (30%)  
                - Quantifiable Results (0-10)  
                - Role Relevance (0-10)  
             - Project Depth (0-10)  
             - Career Progression (0-10)  
                 
-            4. **ATS & Readability (20%)**  
+            4. ATS & Readability (20%)  
             - Header Formatting (✅/❌)  
             - Machine Readability (✅/❌)  
             - Keyword Placement (First 1/3 of resume)  
             - Action Verbs (e.g., "Optimized," "Architected")  
                 
-            5. **Red Flags (Penalties)**  
+            5. Red Flags (Penalties)  
             - Employment Gaps (>6 months): -5 pts  
             - Overused Buzzwords: -3 pts  
             - Generic Objectives: -2 pts  
                 
-            ### **Instructions**  
-            1. **Calculate Scores** for each category (0-100).  
-            2. **Highlight Top 5 Skills** prioritized by industry demand.  
-            3. **Identify Gaps** (e.g., missing Docker/Kubernetes for DevOps).  
-            4. **Suggest Improvements** with examples:  
+            ### Instructions  
+            1. Calculate Scores for each category (0-100).  
+            2. Highlight Top 5 Skills prioritized by industry demand but relevant to the resume.  
+            3. Identify Gaps according to the skillset(e.g., missing Docker/Kubernetes for DevOps).  
+            4. Suggest Improvements with examples:  
             - Rewrite weak bullet points (e.g., "Reduced AWS costs by 30% via Lambda optimization").  
             - ATS fixes (e.g., replace "Managed servers" with "Deployed scalable EC2 instances").  
                 
-            ### **Output Format**  
+            ### Output Format  
             json
             {
-            "overall_score": 82,
+            "overall_score": ,
             "score_breakdown": {
-                "content_structure": 18/20,
-                "technical_skills": 26/30,
-                "experience_impact": 24/30,
-                "ats_readability": 16/20,
-                "red_flags": -2
+                "content_structure": ,
+                "technical_skills": ,
+                "experience_impact": ,
+                "ats_readability": ,
+                "red_flags": 
             },
-            "priority_skills": ["AWS", "Linux", "Python", "Terraform", "React"],
-            "missing_skills": ["Kubernetes", "CI/CD Pipelines", "Prometheus"],
+            "priority_skills": [],
+            "missing_skills": [],
             "improvements": [
-                "Add metrics to 'Cloud Apprentice' role (e.g., 'Auto-scaled 50+ EC2 instances').",
-                "Merge 'HTML/CSS/JS' into 'Frontend Development' for ATS.",
-                "Include a 'Technical Skills' matrix with subcategories."
+                
             ],
             "strengths": [
-                "AWS Certification (SAA-C03) is highly valuable",
-                "Diverse project portfolio demonstrating full-stack skills"
+               
             ],
             "weaknesses": [
-                "No quantifiable results in work experience",
-                "Skills lack context (e.g., 'Python' → 'Built Flask APIs with Python')"
+                
             ]
-            }  Here is the parsed resume json:`+ parsedResult
+            }  
+            Here is the parsed resume json:`+ parsedResult
         // console.log(pdfImprovementPrompt);
         const aiPDFStats = await ai.models.generateContent({
             model: "gemini-2.5-flash",
@@ -227,8 +224,10 @@ export const addResume = async (request, response, next) => {
         fs.writeFile("./pdf/ResumeStats.txt", aiPDFStats.text, () => {
             console.log("sucessfully analysis");
         });
+        
         return response.status(200).json({
             resume: updatedUser.resume,
+            stats: aiPDFStats.text
         });
 
     } catch (error) {
