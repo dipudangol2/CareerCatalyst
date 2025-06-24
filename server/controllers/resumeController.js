@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
-import { createRequire } from 'module';
+import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+const pdfParse = require("pdf-parse");
 // import PDFParser from "pdf2json";
 import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
@@ -11,63 +11,163 @@ const geminiKey = process.env.GOOGLE_GEMINI_API_KEY;
 import User from "../models/UserModel.js";
 
 function geminiPrompt(resumeText) {
-    return ` this is a text parsed from a resume. return the title and it's values in a json format. Below is the resume content 
+  return (
+    ` this is a text parsed from a resume. return the title and it's values in a json format. Below is the resume content 
     
-    ` + resumeText;
+    ` + resumeText
+  );
 }
 
-
 const ai = new GoogleGenAI({
-    apiKey: geminiKey,
-})
+  apiKey: geminiKey,
+});
+
 
 
 export const addResume = async (request, response, next) => {
-    try {
-        // * take resume from the frontend and store the file
-        if (!request.file) {
-            return response.status(400).send({ message: "File is required!" });
-        }
-        const date = Date.now();
-        let fileName = "uploads/resume/" + date + request.file.originalname;
-        fs.renameSync(request.file.path, fileName);
-        const updatedUser = await User.findByIdAndUpdate(
-            request.userId,
-            {
-                resume: fileName,
-            }, {
-            new: true,
-            runValidators: true,
-        }
-        );
-        // * pdf parsing and json creation
-        let pdfData = "";
-        let dataBuffer = fs.readFileSync(`./${fileName}`);
-        const data = await pdfParse(dataBuffer);
-        pdfData += data.text
-        let aiPrompt = geminiPrompt(pdfData);
-        const pdfParseResponse = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: aiPrompt,
-        })
-        fs.writeFile("./uploads/geminiOutput.txt", pdfParseResponse.text, () => {
-            console.log("Completed generation!");
-        })
-        const aiOutput = pdfParseResponse.text;
-        let parsedResult = aiOutput.replace(/^\`\`\`json\s*/, '');
-        parsedResult = parsedResult.replace(/\`\`\`$/, '');
-        request.body = parsedResult;
-        next();
-    } catch (error) {
-        console.log(`Error occured: ${error}`);
-        return response.status(500).send("Internal Server Error");
+  try {
+    // * take resume from the frontend and store the file
+    if (!request.file) {
+      return response.status(400).send({ message: "File is required!" });
     }
-
-}
+    const date = Date.now();
+    let fileName = "uploads/resume/" + date + request.file.originalname;
+    fs.renameSync(request.file.path, fileName);
+    const updatedUser = await User.findByIdAndUpdate(
+      request.userId,
+      {
+        resume: fileName,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    // * pdf parsing and json creation
+    let pdfData = "";
+    let dataBuffer = fs.readFileSync(`./${fileName}`);
+    const data = await pdfParse(dataBuffer);
+    pdfData += data.text;
+    request.rawPdfData = pdfData;
+    let aiPrompt = geminiPrompt(pdfData);
+    const pdfParseResponse = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: aiPrompt,
+    });
+    fs.writeFile("./uploads/geminiOutput.txt", pdfParseResponse.text, () => {
+      console.log("Completed generation!");
+    });
+    const aiOutput = pdfParseResponse.text;
+    let parsedResult = aiOutput.replace(/^\`\`\`json\s*/, "");
+    parsedResult = parsedResult.replace(/\`\`\`$/, "");
+    request.body = parsedResult;
+    next();
+  } catch (error) {
+    console.log(`Error occured: ${error}`);
+    return response.status(500).send("Internal Server Error");
+  }
+};
 
 export const parsePDF = async (request, response, next) => {
-    try {
-        const pdfImprovementPrompt = `
+  function analyzeResume(text) {
+    const result = {
+      contactInfo: 0,
+      sectionCompleteness: 0,
+      skillCoverage: 0,
+      formatting: 0,
+      actionVerbs: 0,
+      total: 0,
+    };
+
+    const emailFound =
+      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/.test(text);
+    const phoneFound =
+      /(?:\+?\d{1,3})?[ -]?\(?\d{3}\)?[ -]?\d{3}[ -]?\d{4}/.test(text);
+    const githubFound = /github\.com/i.test(text);
+    const linkedinFound = /linkedin\.com/i.test(text);
+
+    let contactPoints = 0;
+    if (emailFound) contactPoints += 5;
+    if (phoneFound) contactPoints += 5;
+    if (githubFound) contactPoints += 5;
+    if (linkedinFound) contactPoints += 5;
+    result.contactInfo = contactPoints;
+
+    const sections = [
+      "personal_details",
+      "education",
+      "experience",
+      "projects",
+      "skills",
+    ];
+    const sectionHits = sections.filter((s) => text.toLowerCase().includes(s));
+    result.sectionCompleteness = (sectionHits.length / sections.length) * 20;
+
+    const skillKeywords = [
+      "html",
+      "css",
+      "javascript",
+      "react",
+      "node",
+      "git",
+      "mongo",
+      "docker",
+    ];
+    const foundSkills = skillKeywords.filter((skill) =>
+      new RegExp(`\\b${skill}\\b`, "i").test(text)
+    );
+    result.skillCoverage = (foundSkills.length / skillKeywords.length) * 20;
+
+    const bulletPoints = (text.match(/[\n•\-–]\s+/g) || []).length;
+    const headers = (text.match(/\n[A-Z\s]{4,}\n/g) || []).length;
+    result.formatting = Math.min(20, bulletPoints + headers * 2);
+
+    const actionVerbs = [
+      "led",
+      "built",
+      "developed",
+      "created",
+      "designed",
+      "implemented",
+      "managed",
+    ];
+    const weakVerbs = ["worked", "helped", "responsible"];
+
+    const actionCount = actionVerbs.reduce(
+      (acc, word) =>
+        acc +
+        (text.toLowerCase().match(new RegExp(`\\b${word}\\b`, "g")) || [])
+          .length,
+      0
+    );
+    const weakCount = weakVerbs.reduce(
+      (acc, word) =>
+        acc +
+        (text.toLowerCase().match(new RegExp(`\\b${word}\\b`, "g")) || [])
+          .length,
+      0
+    );
+
+    result.actionVerbs = Math.max(
+      0,
+      Math.min(20, actionCount * 3 - weakCount * 2)
+    );
+
+    result.total =
+      result.contactInfo +
+      result.sectionCompleteness +
+      result.skillCoverage +
+      result.formatting +
+      result.actionVerbs;
+
+    return result;
+  }
+
+  const overallScoreResult=analyzeResume(request.rawPdfData);
+
+  try {
+    const pdfImprovementPrompt =
+      `
             Act as a Senior Resume Analyst and ATS Optimization Expert. Analyze the following resume JSON using weighted metrics and provide structured feedback. Focus on technical roles (e.g.Frontend development, Backend Development, Cloud, DevOps, Software Engineering).  
         
             ### Evaluation Criteria & Weights  
@@ -138,31 +238,30 @@ export const parsePDF = async (request, response, next) => {
             },
             ]
             }  
-            Here is the parsed resume json:`+ request.body;
-        // console.log(pdfImprovementPrompt);
-        const aiPDFStats = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: pdfImprovementPrompt,
-        })
+            Here is the parsed resume json:` + request.body;
+    // console.log(pdfImprovementPrompt);
+    const aiPDFStats = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: pdfImprovementPrompt,
+    });
 
-        fs.writeFile("./pdf/ResumeStats.txt", aiPDFStats.text, () => {
-            console.log("sucessfull Analysis");
-        });
-        return response.status(200).json({
-            stats: aiPDFStats.text
-        });
-    }
-    catch (error) {
-        console.log("Error occured in parsePDF:" + error);
-        response.status(500).send("Internal Server Error!");
-    }
-}
+    fs.writeFile("./pdf/ResumeStats.txt", aiPDFStats.text, () => {
+      console.log("sucessfull Analysis");
+    });
+    return response.status(200).json({
+      stats: aiPDFStats.text,
+      total: overallScoreResult.total
+    });
+  } catch (error) {
+    console.log("Error occured in parsePDF:" + error);
+    response.status(500).send("Internal Server Error!");
+  }
+};
 
 export const generateRoadmap = async (request, response, next) => {
-    try {
-
-        const { title } = request.body;
-        const roadmapPrompt = `
+  try {
+    const { title } = request.body;
+    const roadmapPrompt = `
     Act as a Career Path Advisor and create a personalized 6-month learning roadmap for the given job title. Focus on technical skills, projects, and certifications needed to become job-ready.
 
     ### Output Rules:
@@ -197,21 +296,18 @@ export const generateRoadmap = async (request, response, next) => {
     },
     "estimated_hiring_timeline": ""
     }
-        The job is for ${title}`
+        The job is for ${title}`;
 
-        const generatedRoadmap = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: roadmapPrompt
-        }
-        )
-        fs.writeFile("./pdf/generatedRoadmap.txt", generatedRoadmap.text, () => {
-            console.log("Generated and written roadmap");
-        })
-        response.status(200).send({ roadmap: generatedRoadmap.text });
-
-    }
-    catch (error) {
-        console.log("Error in roadmap generation", error);
-        return response.status(500).send({message: "Internal Server Error!"});
-    }
-}
+    const generatedRoadmap = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: roadmapPrompt,
+    });
+    fs.writeFile("./pdf/generatedRoadmap.txt", generatedRoadmap.text, () => {
+      console.log("Generated and written roadmap");
+    });
+    response.status(200).send({ roadmap: generatedRoadmap.text });
+  } catch (error) {
+    console.log("Error in roadmap generation", error);
+    return response.status(500).send({ message: "Internal Server Error!" });
+  }
+};

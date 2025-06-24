@@ -12,6 +12,7 @@ export default function Findjob() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [parsedResume, setParsedResume] = useState({});
+  const [overallScore , setOverallScore] = useState(0);
   const [roadmap, setRoadmap] = useState({});
   const fileRef = useRef(null);
 
@@ -45,6 +46,7 @@ export default function Findjob() {
       });
       const data = await res.json();
       if (res.ok) {
+        setOverallScore(data.total);
         const parsedData = data.stats.replace("```json", "");
         const finalParsed = parsedData.replace("```", "");
         setParsedResume(JSON.parse(finalParsed));
@@ -58,28 +60,30 @@ export default function Findjob() {
     }
   };
 
-
-  const handleRoadmapGeneration=async (title)=>{
-
+  const handleRoadmapGeneration = async (title) => {
     try {
-      const res=await fetch('http://localhost:5000/api/resume/generate-roadmap',{
-        method:"POST",
-        credentials:"include",
-        body:{
-          title:title.toString()
-        }
-      })
-      const data=await res.json();
-      if(res.ok){
+      console.log(title);
+      const res=await fetch(`http://localhost:5000/api/roadmap/generate-roadmap`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title:title
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
         setRoadmap(data);
-        console.log(data)
-        localStorage.setItem("roadmap",JSON.stringify(data));
+        console.log(data);
+        localStorage.setItem("roadmap", JSON.stringify(data));
       }
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
       toast.error(error.message);
     }
-  }
+  };
   return (
     <section className="section-css max-w-[1500px]">
       <h2 className="font-body text-start font-semibold">
@@ -142,7 +146,7 @@ export default function Findjob() {
               <p className="relative text-textColor-secondary font-body font-medium">
                 Your resume score:
                 <span className="ml-3">
-                  {parsedResume["overall_score"]}/100
+                  {overallScore}/100
                 </span>
               </p>
 
@@ -173,7 +177,11 @@ export default function Findjob() {
             <div className="flex flex-col gap-6 w-full relative">
               {Object.keys(parsedResume).includes("careerRecommendations") &&
                 parsedResume["careerRecommendations"].map((job, index) => (
-                  <JobItem job={job} key={index} handleRoadmapGeneration={handleRoadmapGeneration}/>
+                  <JobItem
+                    job={job}
+                    key={index}
+                    handleRoadmapGeneration={handleRoadmapGeneration}
+                  />
                 ))}
             </div>
           </div>

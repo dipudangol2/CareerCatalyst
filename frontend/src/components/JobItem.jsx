@@ -4,7 +4,6 @@ import bookmark from "../assets/bookmark.svg";
 
 export default function JobItem({job,handleRoadmapGeneration }){
     const handleGeneration=async (title)=>{
-        console.log(title)
         handleRoadmapGeneration(title)
     }
   return (
